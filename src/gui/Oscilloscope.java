@@ -2,12 +2,16 @@ package gui;
 
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-class Oscilloscope {
+class Oscilloscope implements KeyListener {
     private static class Measurement {
         double x;
         double y;
@@ -30,7 +34,17 @@ class Oscilloscope {
     private double yMin = 0;
     private double yMax = 5;
 
+    private Map<Integer, Boolean> keyPresses = new HashMap<>();
     private List<Measurement> measurements = new ArrayList<>();
+
+    private static double lerp(
+            double value,
+            double sourceMin, double sourceMax,
+            double destinationMin, double destinationMax
+    ) {
+        return (value - sourceMin) / (sourceMax - sourceMin) *
+                (destinationMax - destinationMin) + destinationMin;
+    }
 
     Oscilloscope(double x, double y, double width, double height) {
         X = x;
@@ -40,6 +54,78 @@ class Oscilloscope {
 
         for (double i = 0; i < 10; i += 0.1) {
             addPoint(i, i * 0.5);
+        }
+    }
+
+    private void shiftX(double amount) {
+        xMin += amount;
+        xMax += amount;
+    }
+
+    private void shiftY(double amount) {
+        yMin += amount;
+        yMax += amount;
+    }
+
+    private void zoomX(double amount) {
+        xMin += amount;
+        xMax -= amount;
+
+        // Zoomed too far
+        if (xMin >= xMax) {
+            xMin -= amount;
+            xMax += amount;
+        }
+    }
+
+    private void zoomY(double amount) {
+        yMin += amount;
+        yMax -= amount;
+
+        // Zoomed too far
+        if (yMin >= yMax) {
+            yMin -= amount;
+            yMax += amount;
+        }
+    }
+
+    private void readKeyInput() {
+        double speed = 0.02;
+        if (keyPresses.getOrDefault(KeyEvent.VK_SHIFT, false)) {
+            speed = 0.004;
+        }
+
+        if (keyPresses.getOrDefault(KeyEvent.VK_UP, false)) {
+            if (keyPresses.getOrDefault(KeyEvent.VK_CONTROL, false)) {
+                zoomY(speed);
+            }
+            else {
+                shiftY(speed);
+            }
+        }
+        if (keyPresses.getOrDefault(KeyEvent.VK_DOWN, false)) {
+            if (keyPresses.getOrDefault(KeyEvent.VK_CONTROL, false)) {
+                zoomY(-speed);
+            }
+            else {
+                shiftY(-speed);
+            }
+        }
+        if (keyPresses.getOrDefault(KeyEvent.VK_LEFT, false)) {
+            if (keyPresses.getOrDefault(KeyEvent.VK_CONTROL, false)) {
+                zoomX(-speed);
+            }
+            else {
+                shiftX(-speed);
+            }
+        }
+        if (keyPresses.getOrDefault(KeyEvent.VK_RIGHT, false)) {
+            if (keyPresses.getOrDefault(KeyEvent.VK_CONTROL, false)) {
+                zoomX(speed);
+            }
+            else {
+                shiftX(speed);
+            }
         }
     }
 
@@ -87,6 +173,8 @@ class Oscilloscope {
                     (int)(Y + HEIGHT - (i - yMin) * SCALE_INTERVAL)
             );
         }
+
+        readKeyInput();
     }
 
     void addPoint(double time, double voltage) {
@@ -109,48 +197,20 @@ class Oscilloscope {
         }
     }
 
-    void shiftX(double amount) {
-        xMin += amount;
-        xMax += amount;
-    }
-
-    void shiftY(double amount) {
-        yMin += amount;
-        yMax += amount;
-    }
-
-    void zoomX(double amount) {
-        xMin += amount;
-        xMax -= amount;
-
-        // Zoomed too far
-        if (xMin >= xMax) {
-            xMin -= amount;
-            xMax += amount;
-        }
-    }
-
-    void zoomY(double amount) {
-        yMin += amount;
-        yMax -= amount;
-
-        // Zoomed too far
-        if (yMin >= yMax) {
-            yMin -= amount;
-            yMax += amount;
-        }
-    }
-
     void togglePaused() {
         paused = !paused;
     }
 
-    private static double lerp(
-            double value,
-            double sourceMin, double sourceMax,
-            double destinationMin, double destinationMax
-    ) {
-        return (value - sourceMin) / (sourceMax - sourceMin) *
-                (destinationMax - destinationMin) + destinationMin;
+    @Override
+    public void keyTyped(KeyEvent e) {}
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        keyPresses.put(e.getKeyCode(), true);
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        keyPresses.put(e.getKeyCode(), false);
     }
 }

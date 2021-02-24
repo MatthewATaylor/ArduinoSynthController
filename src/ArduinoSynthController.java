@@ -21,6 +21,7 @@ public class ArduinoSynthController {
         window.add(graphicsPanel);
         graphicsPanel.repaint();
         graphicsPanel.revalidate();
+        graphicsPanel.grabFocus();
 
         final int LOOP_DELAY = 10;
         Timer timer = new Timer(LOOP_DELAY, new ActionListener() {

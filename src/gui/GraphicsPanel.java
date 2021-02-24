@@ -52,6 +52,10 @@ public class GraphicsPanel extends JPanel {
         addMouseListener(pauseButton);
     }
 
+    public Oscilloscope getOscilloscope() {
+        return oscilloscope;
+    }
+
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);

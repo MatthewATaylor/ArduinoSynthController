@@ -2,8 +2,6 @@ import gui.GraphicsPanel;
 import gui.Window;
 
 import javax.swing.Timer;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class ArduinoSynthController {
     public static void main(String[] args) {
@@ -22,12 +20,14 @@ public class ArduinoSynthController {
         graphicsPanel.repaint();
         graphicsPanel.revalidate();
         graphicsPanel.grabFocus();
+        port.setOscilloscope(graphicsPanel.getOscilloscope());
 
-        final int LOOP_DELAY = 10;
-        Timer timer = new Timer(LOOP_DELAY, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        Timer timer = new Timer(10, e -> {
+            try {
                 graphicsPanel.repaint();
+            }
+            catch (Exception exception) {
+                exception.printStackTrace();
             }
         });
         timer.start();

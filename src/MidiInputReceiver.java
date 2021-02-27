@@ -11,24 +11,27 @@ class MidiInputReceiver implements Receiver {
     }
 
     public void send(MidiMessage message, long timeStamp) {
-        byte[] messageBytes = message.getMessage();
+        try {
+            byte[] messageBytes = message.getMessage();
 
-        String command;
-        if (messageBytes[0] == -112) {
-            command = "ON";
-        }
-        else if (messageBytes[0] == -128) {
-            command = "OFF";
-        }
-        else {
-            return;
-        }
+            String command;
+            if (messageBytes[0] == -112) {
+                command = "ON";
+            } else if (messageBytes[0] == -128) {
+                command = "OFF";
+            } else {
+                return;
+            }
 
-        int noteIndex = messageBytes[1] - MIN_NOTE_ID;
-        command += " " + noteIndex;
+            int noteIndex = messageBytes[1] - MIN_NOTE_ID;
+            command += " " + noteIndex;
 
-        System.out.println("MIDI message: " + command);
-        port.write(command);
+            System.out.println("MIDI message: " + command);
+            port.write(command);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void close() {}

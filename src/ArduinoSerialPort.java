@@ -85,23 +85,25 @@ public class ArduinoSerialPort implements SerialPortMessageListener {
 
     @Override
     public void serialEvent(SerialPortEvent serialPortEvent) {
-        String message = new String(serialPortEvent.getReceivedData(), CHARSET);
-        message = message.substring(0, message.length() - DELIMITER.length);
-        System.out.println("Serial input: " + message);
-        if (message.length() > 6 && message.substring(0, 3).equals("OSC")) {
-            String[] messageSegments = message.split(" \\| ");
-            if (messageSegments.length == 3) {
-                double seconds = Double.parseDouble(messageSegments[1]) / 1000000;
-                double voltage = Double.parseDouble(messageSegments[2]);
-                if (oscilloscope != null) {
-                    try {
+        try {
+            String message = new String(serialPortEvent.getReceivedData(), CHARSET);
+            message = message.substring(0, message.length() - DELIMITER.length);
+            if (message.length() > 6 && message.substring(0, 3).equals("OSC")) {
+                String[] messageSegments = message.split(" \\| ");
+                if (messageSegments.length == 3) {
+                    double seconds = Double.parseDouble(messageSegments[1]) / 1000000;
+                    double voltage = Double.parseDouble(messageSegments[2]);
+                    if (oscilloscope != null) {
                         oscilloscope.addPoint(seconds, voltage);
-                    }
-                    catch (Exception e) {
-                        e.printStackTrace();
                     }
                 }
             }
+            else {
+                System.out.println("Serial input: " + message);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

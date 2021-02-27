@@ -22,12 +22,12 @@ public class ArduinoSynthController {
         graphicsPanel.grabFocus();
         port.setOscilloscope(graphicsPanel.getOscilloscope());
 
-        Timer timer = new Timer(10, e -> {
+        Timer timer = new Timer(10, event -> {
             try {
                 graphicsPanel.repaint();
             }
-            catch (Exception exception) {
-                exception.printStackTrace();
+            catch (Exception e) {
+                e.printStackTrace();
             }
         });
         timer.start();
